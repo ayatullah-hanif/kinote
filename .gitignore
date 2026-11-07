@@ -17,3 +17,7 @@ config/dataroot.txt
 slprj/
 *.slxc
 .DS_Store
+ HEAD
+
+*.zip
+91a18845893063f25620467ee4cdd929ab6cda48
