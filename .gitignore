@@ -1,0 +1,19 @@
+# Recordings, videos and databases never go in Git (they live in the shared data folder)
+data/
+*.mat
+*.fif
+*.edf
+*.mp4
+*.avi
+database/*.db
+
+# Per-user configuration
+config/dataroot.txt
+
+# MATLAB and OS clutter
+*.asv
+*.autosave
+*.m~
+slprj/
+*.slxc
+.DS_Store
