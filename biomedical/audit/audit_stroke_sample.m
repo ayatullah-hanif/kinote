@@ -2,8 +2,9 @@
 % Requires Signal Processing Toolbox.
 % Reads the original file without modifying it.
 
-% Locate data relative to this script, saved in the repository root.
-projectFolder = fileparts(mfilename('fullpath'));
+% Locate the repository root two levels above this script.
+scriptFolder = fileparts(mfilename('fullpath'));
+projectFolder = fileparts(fileparts(scriptFolder));
 recordingName = "L_01_session2_left1.edf";
 
 files = dir(fullfile(projectFolder, "**", recordingName));
