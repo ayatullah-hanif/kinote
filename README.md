@@ -1,19 +1,28 @@
-1. Sample Data Import
-Uploaded L_01_session2_left1.edf from the stroke-recovery dataset to the project's data folder in MATLAB Online. Successfully inspected the recording using edfinfo and loaded its signals and event annotations using edfread.
+# Reliability-Aware EEG-EMG Stroke Rehabilitation Platform (research prototype)
 
-Conversion to MATLAB's .mat format was unnecessary because MATLAB reads European Data Format (.edf) directly. The original recording was preserved unchanged. This initial check covered one recording run from patient 01, session 2, involving left-hand responses.
-2. Initial Dataset Audit
-Confirmed the following properties:
+Not a medical device. All patient data used here is public, de-identified research data.
 
-| Property | Verified result |
-|---|---|
-| Channels | 11 total |
-| Brain-related channel labels | `F7`, `F3`, `F4`, `F8`, `C3`, `C4`, `A1`, `A2` |
-| Muscle recordings | `right EDC` and `left EDC`, representing the extensor digitorum communis muscles |
-| Heart recording | `EKG` |
-| Signal units | Microvolts (`uV`) |
-| Sampling rate | 500 samples per second for every channel |
-| Recording duration | 159 seconds |
-| Sample count | 79,500 samples verified in the first channel |
-| Continuity | File declares continuous recording (`EDF+C`) |
-| Event annotations | Timestamped `flash_l` and `flash_r` cues successfully loaded |
+## Folders and owners (edit this table to match your team)
+| Folder | Contents | Owner |
+|---|---|---|
+| biomedical/ | loaders, filters, features, quality indices, dataset audit | |
+| fusion/ | ordinary fusion, quality-aware fusion, abstention | |
+| vision/ | pose keypoints, joint angles, repetition counting | |
+| apps/ | PatientApp.mlapp, TherapistApp.mlapp | |
+| integration/ | data contract (makeRecording), adapters | |
+| database/ | SQLite schema and helpers | |
+| tests/ | unit tests | |
+| docs/ | decisions, data notes, write-up | |
+
+## Team rules
+1. One owner per folder. Do not edit files in someone else's folder: message them or open a branch.
+2. Each .mlapp file has exactly one editor. App files are binary and cannot be merged.
+3. Work on your own branch (feat/<area>), pull before you push, commit small and often.
+4. Data never goes in Git. It lives in the shared data folder; set your path in config/dataroot.txt.
+5. Every data source returns the struct from integration/makeRecording.m.
+6. Log every threshold, exclusion and assumption in docs/decisions.md.
+
+## First run
+1. Open the folder as a MATLAB project, then run `setupProject`
+2. Run `checkEnvironment`
+3. Run `createSchema("database/rehab.db")`
