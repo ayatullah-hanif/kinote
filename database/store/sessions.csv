@@ -1,0 +1,4 @@
+session_id,time,patient_id,exercise,target_reps,repetitions,range_of_motion_deg,visibility,edge_fraction,status,clip,source
+"S20261111105931","2026-11-11 11:00","L_01","Elbow bend",8,NaN,NaN,0.545,0.31,"low_tracking_quality","L_01_S20261111105931.avi","live camera"
+"S20261111111439","2026-11-11 11:15","L_06","Elbow bend",8,8,137.361991119385,0.969512195121951,0.00609756097560976,"recorded","L_06_S20261111111439.avi","live camera"
+"S20261111184329","2026-11-11 18:43","L_06","Elbow bend",8,8,159.686682605743,0.913793103448276,0.0862068965517241,"recorded","L_06_S20261111184329.avi","live camera"

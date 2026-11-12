@@ -1,0 +1,12 @@
+Channel,Units,SamplesPerSecond
+F7,uV,500
+F3,uV,500
+F4,uV,500
+F8,uV,500
+C3,uV,500
+C4,uV,500
+A1,uV,500
+A2,uV,500
+right EDC,uV,500
+left EDC,uV,500
+EKG,uV,500
