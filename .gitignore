@@ -21,3 +21,5 @@ slprj/
 
 *.zip
 91a18845893063f25620467ee4cdd929ab6cda48
+!web/data/
+!web/data/*.csv
