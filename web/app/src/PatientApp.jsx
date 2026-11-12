@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
-import { EXERCISE } from './constants'
+import { EXERCISE, displayName } from './constants'
 import Shell from './Shell'
 import SessionsView from './SessionsView'
 import MessagesView from './MessagesView'
@@ -18,10 +18,10 @@ export default function PatientApp({ profile }) {
   }, [profile.id, tab])
 
   return (
-    <Shell who={'Patient: ' + profile.email} tabs={['Home', 'Session', 'Progress', 'Messages']} active={tab} onTab={setTab}>
+    <Shell who={'Patient: ' + displayName(profile)} tabs={['Home', 'Session', 'Progress', 'Messages']} active={tab} onTab={setTab}>
       {tab === 'Home' && (
         <>
-          <h2>Today's exercise</h2>
+          <h2>{profile.first_name ? 'Hello, ' + profile.first_name : "Today's exercise"}</h2>
           <div className="card">
             <h3>{EXERCISE.name} · {EXERCISE.target} repetitions</h3>
             <p>{EXERCISE.instruction}</p>

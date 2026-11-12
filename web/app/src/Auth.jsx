@@ -3,6 +3,8 @@ import { supabase } from './supabaseClient'
 
 export default function Auth() {
   const [mode, setMode] = useState('in')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [msg, setMsg] = useState('')
@@ -13,7 +15,10 @@ export default function Auth() {
     setMsg(''); setBusy(true)
     const fn = mode === 'in'
       ? supabase.auth.signInWithPassword({ email, password })
-      : supabase.auth.signUp({ email, password })
+      : supabase.auth.signUp({
+          email, password,
+          options: { data: { first_name: firstName.trim(), last_name: lastName.trim() } },
+        })
     const { data, error } = await fn
     setBusy(false)
     if (error) setMsg(error.message)
@@ -24,6 +29,12 @@ export default function Auth() {
     <form className="auth" onSubmit={submit}>
       <div className="brand">Kinote</div>
       <p className="muted">{mode === 'in' ? 'Sign in to continue' : 'Create a patient account'}</p>
+      {mode === 'up' && (
+        <>
+          <input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+          <input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+        </>
+      )}
       <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
       <input type="password" placeholder="Password (6+ characters)" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
       <button className="btn" disabled={busy} type="submit" style={{ width: '100%' }}>
