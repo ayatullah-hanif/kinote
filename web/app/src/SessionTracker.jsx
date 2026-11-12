@@ -26,6 +26,7 @@ export default function SessionTracker({ profile }) {
   const [warn, setWarn] = useState(false)
   const [result, setResult] = useState(null)
   const [err, setErr] = useState('')
+  const [ratio, setRatio] = useState(4 / 3)
 
   useEffect(() => () => {
     runRef.current.running = false
@@ -44,6 +45,12 @@ export default function SessionTracker({ profile }) {
       const v = videoRef.current
       v.srcObject = stream
       await v.play()
+      if (v.videoWidth) setRatio(v.videoWidth / v.videoHeight)
+      try {
+        const track = stream.getVideoTracks()[0]
+        const caps = track.getCapabilities ? track.getCapabilities() : {}
+        if (caps.zoom) await track.applyConstraints({ advanced: [{ zoom: caps.zoom.min }] })
+      } catch { /* zoom not supported, ignore */ }
     } catch (e) {
       setErr('Could not start the camera or tracker: ' + (e.message || e))
       setPhase('idle'); setText('Choose the arm to track, then press Start.')
@@ -144,7 +151,7 @@ export default function SessionTracker({ profile }) {
   const running = phase === 'running'
   return (
     <div className="card">
-      <div className="camwrap">
+      <div className="camwrap" style={{ aspectRatio: ratio, width: `min(100%, ${Math.round(70 * ratio)}vh)` }}>
         <video ref={videoRef} playsInline muted />
         <canvas ref={canvasRef} />
         {phase === 'idle' && !result && <div className="camhint">Camera is off</div>}
