@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
+import { displayName } from './constants'
 import Shell from './Shell'
 import SessionsView from './SessionsView'
 import MessagesView from './MessagesView'
-import { displayName } from './constants'
+import SignalsView from './SignalsView'
+import ExperimentView from './ExperimentView'
 
 export default function DoctorApp({ profile }) {
   const [tab, setTab] = useState('Movement')
@@ -25,16 +27,21 @@ export default function DoctorApp({ profile }) {
   const current = patients.find((p) => p.id === sel)
 
   return (
-    <Shell who={'Physiotherapist: ' + displayName(profile)} tabs={['Movement', 'Muscle and brain signals', 'Messages']} active={tab} onTab={setTab}>
+    <Shell who={'Physiotherapist: ' + displayName(profile)}
+      tabs={['Movement', 'Muscle and brain signals', 'Experiment', 'Messages']} active={tab} onTab={setTab}>
       <h2>Physiotherapist dashboard</h2>
-      {patients.length === 0 ? (
+      {tab === 'Experiment' ? (
+        <ExperimentView />
+      ) : patients.length === 0 ? (
         <div className="card"><p className="muted">No patients have signed up yet.</p></div>
       ) : (
         <>
           <div className="card">
             <label className="muted small">Patient</label>
             <select value={sel} onChange={(e) => setSel(e.target.value)}>
-              {patients.map((p) => <option key={p.id} value={p.id}>{displayName(p)}{p.first_name ? ' (' + p.email + ')' : ''}</option>)}
+              {patients.map((p) => (
+                <option key={p.id} value={p.id}>{displayName(p)}{p.first_name ? ' (' + p.email + ')' : ''}</option>
+              ))}
             </select>
           </div>
           {tab === 'Movement' && (
@@ -44,10 +51,7 @@ export default function DoctorApp({ profile }) {
             </>
           )}
           {tab === 'Muscle and brain signals' && (
-            <>
-              <div className="banner">[Replayed recording] Results from research dataset patient {current?.dataset_patient}, not this patient's live session.</div>
-              <div className="card"><p className="muted">The insights, cue table and Clean/Degraded switch are added in a later step.</p></div>
-            </>
+            <SignalsView key={sel} defaultPatient={current?.dataset_patient} />
           )}
           {tab === 'Messages' && <MessagesView key={sel} patientId={sel} sender="doctor" />}
         </>
