@@ -4,6 +4,7 @@ import { EXERCISE, displayName } from './constants'
 import Shell from './Shell'
 import SessionsView from './SessionsView'
 import MessagesView from './MessagesView'
+import SessionTracker from './SessionTracker'
 
 export default function PatientApp({ profile }) {
   const [tab, setTab] = useState('Home')
@@ -31,10 +32,10 @@ export default function PatientApp({ profile }) {
           <div className="card">{lastMsg ? lastMsg.body : <span className="muted">No messages yet.</span>}</div>
         </>
       )}
-      {tab === 'Session' && (
+       {tab === 'Session' && (
         <>
           <h2>Exercise session</h2>
-          <div className="card"><p className="muted">Live arm tracking is the next thing we build here.</p></div>
+          <SessionTracker profile={profile} />
         </>
       )}
       {tab === 'Progress' && (<><h2>Your progress</h2><SessionsView sessions={sessions} /></>)}
