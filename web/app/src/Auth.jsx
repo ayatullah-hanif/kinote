@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { supabase } from './supabaseClient'
 
-export default function Auth() {
-  const [mode, setMode] = useState('in')
+export default function Auth({ initialMode = 'in', onBack }) {
+  const [mode, setMode] = useState(initialMode)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
@@ -27,7 +27,10 @@ export default function Auth() {
 
   return (
     <form className="auth" onSubmit={submit}>
-      <div className="brand">Kinote</div>
+      {onBack && (
+        <a href="#" className="small" onClick={(e) => { e.preventDefault(); onBack() }}>← Back to home</a>
+      )}
+      <div className="brand" style={{ marginTop: 10 }}>Kinote</div>
       <p className="muted">{mode === 'in' ? 'Sign in to continue' : 'Create a patient account'}</p>
       {mode === 'up' && (
         <>
