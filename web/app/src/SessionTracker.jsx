@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision'
 import { supabase } from './supabaseClient'
-import { EXERCISE } from './constants'
+import { EXERCISE as DEFAULT_EXERCISE } from './constants'
 import { SIDES, MIN_VIS, EDGE, MAX_SEC, jointAngle, analyzeSession } from './tracking'
 
 async function loadLandmarker() {
@@ -14,7 +14,22 @@ async function loadLandmarker() {
   try { return await make('GPU') } catch { return await make('CPU') }
 }
 
-export default function SessionTracker({ profile }) {
+function pickMime() {
+  if (!window.MediaRecorder) return null
+  const opts = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4']
+  return opts.find((m) => MediaRecorder.isTypeSupported(m)) || ''
+}
+
+function stopRecorder(rec) {
+  return new Promise((resolve) => {
+    if (!rec || rec.state === 'inactive') return resolve()
+    rec.onstop = () => resolve()
+    rec.stop()
+  })
+}
+
+export default function SessionTracker({ profile, exercise }) {
+  const EXERCISE = exercise || DEFAULT_EXERCISE
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const landmarkerRef = useRef(null)
@@ -22,23 +37,26 @@ export default function SessionTracker({ profile }) {
   const runRef = useRef({ running: false, frames: [] })
   const [phase, setPhase] = useState('idle')   // idle | loading | running | saving
   const [side, setSide] = useState('right')
+  const [saveVideo, setSaveVideo] = useState(false)
+  const [ratio, setRatio] = useState(4 / 3)
   const [text, setText] = useState('Choose the arm to track, then press Start.')
   const [warn, setWarn] = useState(false)
   const [result, setResult] = useState(null)
   const [err, setErr] = useState('')
-  const [ratio, setRatio] = useState(4 / 3)
 
   useEffect(() => () => {
     runRef.current.running = false
+    try { if (runRef.current.rec && runRef.current.rec.state !== 'inactive') runRef.current.rec.stop() } catch { /* ignore */ }
     if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop())
   }, [])
 
   async function start() {
     setErr(''); setResult(null); setWarn(false)
     setPhase('loading'); setText('Loading the tracker. The first time takes a moment…')
+    let stream
     try {
       if (!landmarkerRef.current) landmarkerRef.current = await loadLandmarker()
-      const stream = await navigator.mediaDevices.getUserMedia({
+      stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false,
       })
       streamRef.current = stream
@@ -57,10 +75,19 @@ export default function SessionTracker({ profile }) {
       return
     }
 
-    const useSide = side
-    const idx = SIDES[useSide]
-    const run = { running: true, frames: [], reps: 0, down: false, t0: performance.now(), lastVT: -1, lastUi: 0 }
+    const idx = SIDES[side]
+    const run = { running: true, frames: [], chunks: [], rec: null, reps: 0, down: false, t0: performance.now(), lastVT: -1, lastUi: 0 }
     runRef.current = run
+
+    if (saveVideo && window.MediaRecorder) {
+      try {
+        const mime = pickMime()
+        const rec = new MediaRecorder(stream, { ...(mime ? { mimeType: mime } : {}), videoBitsPerSecond: 600000 })
+        rec.ondataavailable = (e) => { if (e.data && e.data.size) run.chunks.push(e.data) }
+        rec.start(1000)
+        run.rec = rec
+      } catch { run.rec = null }
+    }
     setPhase('running')
 
     const loop = () => {
@@ -119,6 +146,7 @@ export default function SessionTracker({ profile }) {
     const run = runRef.current
     if (!run.running) return
     run.running = false
+    await stopRecorder(run.rec)
     if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop())
     if (videoRef.current) videoRef.current.srcObject = null
     const c = canvasRef.current
@@ -130,6 +158,18 @@ export default function SessionTracker({ profile }) {
     }
     setPhase('saving'); setText('Analysing and saving…')
     const r = analyzeSession(run.frames)
+
+    let clipPath = null, note = ''
+    if (run.chunks.length) {
+      const type = (run.rec && run.rec.mimeType) || 'video/webm'
+      const ext = type.includes('mp4') ? 'mp4' : 'webm'
+      const blob = new Blob(run.chunks, { type })
+      const path = `${profile.id}/${Date.now()}.${ext}`
+      const { error: upErr } = await supabase.storage.from('clips').upload(path, blob, { contentType: type.split(';')[0] })
+      if (upErr) note = ' The video could not be uploaded: ' + upErr.message
+      else clipPath = path
+    }
+
     const { error } = await supabase.from('sessions').insert({
       patient_id: profile.id,
       exercise: EXERCISE.name,
@@ -141,11 +181,12 @@ export default function SessionTracker({ profile }) {
       status: r.status,
       source: 'browser camera',
       angle_curve: r.curve,
+      clip_path: clipPath,
     })
     setPhase('idle')
     if (error) { setErr('Could not save the session: ' + error.message); setText('Not saved.'); return }
     setResult(r)
-    setText('Session saved. Your physiotherapist can review it.')
+    setText('Session saved. Your physiotherapist can review it.' + (clipPath ? ' The video was shared with them.' : '') + note)
   }
 
   const running = phase === 'running'
@@ -158,6 +199,10 @@ export default function SessionTracker({ profile }) {
       </div>
       <p style={{ fontWeight: 700, fontSize: 17, color: warn ? 'var(--warn)' : 'var(--text)' }}>{text}</p>
       <p className="muted small">{EXERCISE.instruction} Keep your arm flat to the camera and fully inside the picture.</p>
+      <label className="consent">
+        <input type="checkbox" checked={saveVideo} disabled={phase !== 'idle'} onChange={(e) => setSaveVideo(e.target.checked)} />
+        <span>Save a video of this session so my physiotherapist can watch it. Only my physiotherapist and I can see it. If I leave this unticked, no video is recorded.</span>
+      </label>
       <div className="row" style={{ marginTop: 10 }}>
         <select style={{ width: 150, margin: 0 }} value={side} disabled={phase !== 'idle'} onChange={(e) => setSide(e.target.value)}>
           <option value="right">Right arm</option>

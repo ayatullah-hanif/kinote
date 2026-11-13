@@ -1,4 +1,4 @@
-export default function SessionsView({ sessions }) {
+export default function SessionsView({ sessions, onOpen, openId }) {
   if (!sessions.length) {
     return <div className="card"><p className="muted">No sessions yet.</p></div>
   }
@@ -28,14 +28,25 @@ export default function SessionsView({ sessions }) {
       <div className="card scroll">
         <table>
           <thead>
-            <tr><th>Time</th><th>Repetitions</th><th>Range of motion</th><th>Tracking</th><th>Result</th><th>Source</th></tr>
+            <tr>
+              <th>Time</th>
+              {onOpen && <th>Details</th>}
+              <th>Repetitions</th><th>Range of motion</th><th>Tracking</th><th>Result</th><th>Source</th>
+            </tr>
           </thead>
           <tbody>
             {sessions.map((s) => {
               const ok = s.status === 'recorded'
               return (
-                <tr key={s.id}>
+                <tr key={s.id} style={openId === s.id ? { background: 'var(--soft)' } : undefined}>
                   <td>{new Date(s.created_at).toLocaleString()}</td>
+                  {onOpen && (
+                    <td>
+                      {(s.clip_path || s.angle_curve)
+                        ? <button className="btn btn-ghost" style={{ padding: '5px 10px', whiteSpace: 'nowrap' }} onClick={() => onOpen(s)}>{s.clip_path ? 'Watch video' : 'View curve'}</button>
+                        : <span className="muted small">None</span>}
+                    </td>
+                  )}
                   <td>{ok ? s.repetitions : 'not tracked'}</td>
                   <td>{ok ? Math.round(s.range_of_motion_deg) + '°' : 'not tracked'}</td>
                   <td>{Math.round((s.visibility || 0) * 100)}%</td>

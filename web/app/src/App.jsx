@@ -37,14 +37,7 @@ export default function App() {
   if (!profile) return <div className="center">Loading…</div>
 
   if (profile.role !== 'admin') return <PatientApp profile={profile} />
-
-  const showDoctor = view === 'doctor'
-  return (
-    <>
-      <button className="viewswitch" onClick={() => switchView(showDoctor ? 'patient' : 'doctor')}>
-        {showDoctor ? 'Switch to patient view' : 'Switch to doctor view'}
-      </button>
-      {showDoctor ? <DoctorApp profile={profile} /> : <PatientApp profile={profile} />}
-    </>
-  )
+  return view === 'doctor'
+    ? <DoctorApp profile={profile} onSwitch={() => switchView('patient')} />
+    : <PatientApp profile={profile} onSwitch={() => switchView('doctor')} />
 }
