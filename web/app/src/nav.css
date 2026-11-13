@@ -1,0 +1,40 @@
+.app { min-height: 100vh; }
+.topbar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 14px; height: 62px; padding: 0 20px; background: #0a6670; color: #fff; }
+.tbrand { font-size: 24px; font-weight: 800; }
+.navtabs { display: flex; gap: 4px; margin-left: 14px; }
+.ntab { padding: 9px 14px; border: 0; border-radius: 8px; background: transparent; color: #fff; font: inherit; cursor: pointer; white-space: nowrap; }
+.ntab:hover { background: rgba(255,255,255,.14); }
+.ntab.on { background: #fff; color: #0a6670; font-weight: 700; }
+.tspacer { flex: 1; }
+.burger { display: none; width: 42px; height: 42px; border: 0; border-radius: 10px; background: rgba(255,255,255,.14); cursor: pointer; flex-direction: column; justify-content: center; align-items: center; gap: 5px; padding: 0; }
+.burger span { display: block; width: 20px; height: 2px; background: #fff; border-radius: 2px; }
+.acc-wrap { position: relative; }
+.acc-btn { display: flex; align-items: center; gap: 10px; padding: 5px 10px 5px 6px; border: 0; border-radius: 999px; background: rgba(255,255,255,.14); color: #fff; font: inherit; cursor: pointer; text-align: left; }
+.acc-btn:hover { background: rgba(255,255,255,.22); }
+.av { width: 34px; height: 34px; border-radius: 50%; background: #fff; color: #0a6670; display: grid; place-items: center; font-weight: 800; font-size: 13px; flex: none; }
+.acc-text { display: flex; flex-direction: column; line-height: 1.15; }
+.acc-text b { font-size: 14px; }
+.acc-text small { font-size: 12px; color: #cfe8ea; }
+.clickaway { position: fixed; inset: 0; z-index: 40; }
+.accmenu2 { position: absolute; right: 0; top: calc(100% + 8px); min-width: 230px; background: #fff; color: #1a262a; border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,.25); padding: 6px; z-index: 50; }
+.accmenu2 .em { font-size: 12px; color: #66757a; padding: 7px 10px; word-break: break-all; }
+.accmenu2 button { display: block; width: 100%; text-align: left; padding: 10px; border: 0; background: transparent; border-radius: 8px; font: inherit; color: #1a262a; cursor: pointer; }
+.accmenu2 button:hover { background: #e6f2f3; }
+.content { max-width: 1040px; margin: 0 auto; padding: 28px 24px 60px; }
+.drawer, .scrim { display: none; }
+
+@media (max-width: 899px) {
+  .burger { display: flex; }
+  .navtabs { display: none; }
+  .acc-text { display: none; }
+  .acc-btn { padding: 4px; }
+  .topbar { padding: 0 14px; }
+  .content { padding: 18px 14px 50px; }
+  .scrim { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 60; }
+  .drawer { display: flex; flex-direction: column; gap: 6px; position: fixed; top: 0; left: 0; bottom: 0; width: 270px; max-width: 82vw; background: #0a6670; color: #fff; padding: 16px 12px; z-index: 70; transform: translateX(-100%); transition: transform .22s ease; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 4px; }
+  .dclose { border: 0; background: rgba(255,255,255,.14); color: #fff; width: 38px; height: 38px; border-radius: 10px; font-size: 24px; cursor: pointer; line-height: 1; }
+  .dtab { text-align: left; padding: 13px 14px; border: 0; border-radius: 10px; background: transparent; color: #fff; font: inherit; font-size: 16px; cursor: pointer; }
+  .dtab.on { background: #fff; color: #0a6670; font-weight: 700; }
+}

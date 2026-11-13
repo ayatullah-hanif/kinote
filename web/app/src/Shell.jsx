@@ -1,3 +1,4 @@
+import './nav.css'
 import { useState } from 'react'
 import { supabase } from './supabaseClient'
 import { displayName } from './constants'
