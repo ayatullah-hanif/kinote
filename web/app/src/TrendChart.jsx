@@ -1,7 +1,7 @@
 const W = 640, H = 250, PL = 52, PR = 14, PT = 14, PB = 34
 const COLORS = ['#0a6670', '#c77d1a']
 
-export default function TrendChart({ title, note, sessions, series, fixedRange, refLine, fmt }) {
+export default function TrendChart({ title, note, sessions, series, fixedRange, refLine, fmt, xPrefix, xSuffix }) {
   const f = fmt || ((v) => String(Math.round(v * 10) / 10))
   const all = []
   series.forEach((s) => s.values.forEach((p) => {
@@ -33,7 +33,7 @@ export default function TrendChart({ title, note, sessions, series, fixedRange, 
           <line x1={PL} x2={W - PR} y1={y(refLine)} y2={y(refLine)} stroke="#66757a" strokeDasharray="4 4" />
         )}
         {sessions.map((s, i) => (
-          <text key={s} x={x(i)} y={H - 12} textAnchor="middle" fontSize="11" style={{ fill: 'var(--muted)' }}>S{s}</text>
+          <text key={s} x={x(i)} y={H - 12} textAnchor="middle" fontSize="11" style={{ fill: 'var(--muted)' }}>{(xPrefix ?? 'S') + s + (xSuffix ?? '')}</text>
         ))}
         {series.map((s, si) => {
           const color = s.color || COLORS[si % COLORS.length]
@@ -51,7 +51,7 @@ export default function TrendChart({ title, note, sessions, series, fixedRange, 
               ))}
               {pts.map((p, i) => p && (
                 <circle key={'c' + i} cx={p[0]} cy={p[1]} r="4.5" fill={color}>
-                  <title>{s.name + ', session ' + sessions[i] + ': ' + f(s.values[i].y)}</title>
+                  <title>{s.name + ', ' + (xPrefix ?? 'session ') + sessions[i] + (xSuffix ?? '') + ': ' + f(s.values[i].y)}</title>
                 </circle>
               ))}
             </g>

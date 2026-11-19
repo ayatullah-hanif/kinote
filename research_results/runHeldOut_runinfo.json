@@ -1,0 +1,13 @@
+{
+  "script": "runHeldOut",
+  "date": "2026-11-19 09:49:10",
+  "matlab": "26.2.0.3468271 (R2026b) Update 2",
+  "params": {
+    "abstainBelow": 0.6,
+    "rules": [
+      "v1 mean quality (current)",
+      "v2 mean quality",
+      "v2 min quality"
+    ]
+  }
+}

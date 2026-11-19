@@ -1,0 +1,9 @@
+{
+  "script": "runMDC",
+  "date": "2026-11-19 09:57:09",
+  "matlab": "26.2.0.3468271 (R2026b) Update 2",
+  "params": {
+    "sdWithin": 0.35760283355452771,
+    "minAnsweredCues": 3
+  }
+}

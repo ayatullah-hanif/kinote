@@ -8,6 +8,7 @@ import MessagesView from './MessagesView'
 import SignalsView from './SignalsView'
 import ExperimentView from './ExperimentView'
 import ExercisesView from './ExercisesView'
+import ResearchView from './ResearchView'
 
 export default function DoctorApp({ profile, onSwitch }) {
   const [tab, setTab] = useState('Movement')
@@ -43,8 +44,12 @@ export default function DoctorApp({ profile, onSwitch }) {
       tabs={['Movement', 'Exercises', 'Muscle and brain signals', 'Experiment', 'Messages']} active={tab} onTab={setTab}
       onSwitch={onSwitch} switchLabel="Switch to patient view">
       <h2>Physiotherapist dashboard</h2>
-      {tab === 'Experiment' ? (
+      {tab === 'Research' ? (
+        <>
+        <ResearchView />
+        <h3 style={{ marginTop: 24 }}>Earlier damage experiment</h3>
         <ExperimentView />
+        </>
       ) : patients.length === 0 ? (
         <div className="card">
           <p className="muted">No patients have signed up yet.</p>

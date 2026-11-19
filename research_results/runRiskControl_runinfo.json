@@ -1,0 +1,13 @@
+{
+  "script": "runRiskControl",
+  "date": "2026-11-19 09:49:23",
+  "matlab": "26.2.0.3468271 (R2026b) Update 2",
+  "params": {
+    "delta": 0.1,
+    "targets": [
+      0.15,
+      0.2,
+      0.25
+    ]
+  }
+}

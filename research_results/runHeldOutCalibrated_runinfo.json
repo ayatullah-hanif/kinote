@@ -1,0 +1,8 @@
+{
+  "script": "runHeldOutCalibrated",
+  "date": "2026-11-19 09:57:10",
+  "matlab": "26.2.0.3468271 (R2026b) Update 2",
+  "params": {
+    "withholdCleanShare": 0.05
+  }
+}

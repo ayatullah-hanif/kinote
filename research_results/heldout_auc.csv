@@ -1,0 +1,22 @@
+condition,group,rule,auc_damage_detection
+emg_noise_8,seen,v1 mean quality (current),0.859297494649377
+emg_noise_8,seen,v2 mean quality,0.879562717696924
+emg_noise_8,seen,v2 min quality,0.946451802425616
+emg_dropout_1,seen,v1 mean quality (current),0.987424971265591
+emg_dropout_1,seen,v2 mean quality,0.894180750074497
+emg_dropout_1,seen,v2 min quality,0.951291984164148
+eeg_spike_10,seen,v1 mean quality (current),0.685677116119015
+eeg_spike_10,seen,v2 mean quality,0.827367913047127
+eeg_spike_10,seen,v2 min quality,0.792974946493768
+emg_pops_10,heldout,v1 mean quality (current),0.596795047274106
+emg_pops_10,heldout,v2 mean quality,0.828674008717808
+emg_pops_10,heldout,v2 min quality,0.874686769567689
+emg_hum_3,heldout,v1 mean quality (current),0.903175472214618
+emg_hum_3,heldout,v2 mean quality,0.878915117185032
+emg_hum_3,heldout,v2 min quality,0.944673503337615
+emg_attenuation_0.3,heldout,v1 mean quality (current),0.917545847496748
+emg_attenuation_0.3,heldout,v2 mean quality,0.847158924000168
+emg_attenuation_0.3,heldout,v2 min quality,0.887307482479332
+eeg_noise_6,heldout,v1 mean quality (current),0.678782156196232
+eeg_noise_6,heldout,v2 mean quality,0.965617524864661
+eeg_noise_6,heldout,v2 min quality,0.964614545301943
