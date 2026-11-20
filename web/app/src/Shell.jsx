@@ -2,6 +2,7 @@ import './nav.css'
 import { useState } from 'react'
 import { supabase } from './supabaseClient'
 import { displayName } from './constants'
+import './charts.css'
 
 function initials(p) {
   const s = ((p.first_name?.[0] || '') + (p.last_name?.[0] || '')).toUpperCase()

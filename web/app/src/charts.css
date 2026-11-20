@@ -1,0 +1,16 @@
+.hbar { display: grid; grid-template-columns: 190px 1fr 56px; gap: 8px; align-items: center; margin: 5px 0; font-size: 13px; }
+.ht { background: #eef2f3; border-radius: 4px; height: 14px; overflow: hidden; }
+.ht div { height: 100%; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: #66757a; margin-top: 6px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } .hbar { grid-template-columns: 120px 1fr 48px; } }
+.row-warn td { background: #fdeccd; color: #4a2e00; }
+.tall { max-height: 380px; overflow-y: auto; }
+.tall th { position: sticky; top: 0; background: #fff; }
+.tagline { margin: 6px 0; }
+.videobox { margin: 10px 0 14px; }
+.embedwrap { position: relative; width: 100%; max-width: 640px; aspect-ratio: 16 / 9; }
+.embedwrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 10px; }
+.consent { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; font-size: 14px; }
+.consent input { width: auto; margin: 3px 0 0; }

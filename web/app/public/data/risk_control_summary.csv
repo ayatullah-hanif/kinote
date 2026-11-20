@@ -1,0 +1,13 @@
+method,target_pct,GroupCount,fun1_test_answered_pct,fun1_test_wrong_among_answered_pct,fun1_target_met
+Decision margin,15,4,0,NaN,NaN
+Decision margin,20,4,0,NaN,NaN
+Decision margin,25,4,9.90268640350877,36.6089965397924,0
+Margin x quality v2,15,4,0,NaN,NaN
+Margin x quality v2,20,4,0,NaN,NaN
+Margin x quality v2,25,4,19.6957236842105,15.2471315092674,0.5
+Quality v1 (current),15,4,0,NaN,NaN
+Quality v1 (current),20,4,0,NaN,NaN
+Quality v1 (current),25,4,18.0822887031769,36.2087245270021,0
+Quality v2 (min),15,4,0,NaN,NaN
+Quality v2 (min),20,4,0,NaN,NaN
+Quality v2 (min),25,4,18.5132912517781,47.1546165309452,0

@@ -41,7 +41,7 @@ export default function DoctorApp({ profile, onSwitch }) {
 
   return (
     <Shell profile={profile} roleLabel="Physiotherapist"
-      tabs={['Movement', 'Exercises', 'Muscle and brain signals', 'Experiment', 'Messages']} active={tab} onTab={setTab}
+      tabs={['Movement', 'Exercises', 'Muscle and brain signals', 'Research', 'Messages']} active={tab} onTab={setTab}
       onSwitch={onSwitch} switchLabel="Switch to patient view">
       <h2>Physiotherapist dashboard</h2>
       {tab === 'Research' ? (
