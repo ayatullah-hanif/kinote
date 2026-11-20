@@ -36,7 +36,7 @@ export default function ExperimentView() {
     <>
       <div className="banner">[Replayed recording, simulated damage] Recordings from a research dataset were damaged on purpose. This is not patient data.</div>
       <div className="card">
-        <h3>Does reliability-aware fusion stay steadier than ordinary fusion?</h3>
+        <h3>Reliability-aware against ordinary fusion</h3>
         <label className="muted small">Share of cues damaged in each recording</label>
         <select value={share} onChange={(e) => setShare(e.target.value)} style={{ maxWidth: 220 }}>
           <option value="25">25% of cues damaged</option>
