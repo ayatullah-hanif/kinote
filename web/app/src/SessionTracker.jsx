@@ -3,6 +3,8 @@ import { FilesetResolver, PoseLandmarker } from '@mediapipe/tasks-vision'
 import { supabase } from './supabaseClient'
 import { EXERCISE as DEFAULT_EXERCISE } from './constants'
 import { SIDES, MIN_VIS, EDGE, MAX_SEC, jointAngle, analyzeSession } from './tracking'
+import { evaluateCriteria, describeCriterion } from './criteria'
+import { captureFrame, pickFrames, runVisualCheck } from './visualCheck'
 
 async function loadLandmarker() {
   const fileset = await FilesetResolver.forVisionTasks('/mediapipe/wasm')
@@ -30,6 +32,7 @@ function stopRecorder(rec) {
 
 export default function SessionTracker({ profile, exercise }) {
   const EXERCISE = exercise || DEFAULT_EXERCISE
+  const customCrit = (EXERCISE.criteria || []).filter((c) => c.type === 'custom')
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const landmarkerRef = useRef(null)
@@ -38,6 +41,7 @@ export default function SessionTracker({ profile, exercise }) {
   const [phase, setPhase] = useState('idle')   // idle | loading | running | saving
   const [side, setSide] = useState('right')
   const [saveVideo, setSaveVideo] = useState(false)
+  const [aiConsent, setAiConsent] = useState(false)
   const [ratio, setRatio] = useState(4 / 3)
   const [text, setText] = useState('Choose the arm to track, then press Start.')
   const [warn, setWarn] = useState(false)
@@ -76,7 +80,8 @@ export default function SessionTracker({ profile, exercise }) {
     }
 
     const idx = SIDES[side]
-    const run = { running: true, frames: [], chunks: [], rec: null, reps: 0, down: false, t0: performance.now(), lastVT: -1, lastUi: 0 }
+    const run = { running: true, frames: [], chunks: [], rec: null, reps: 0, down: false, t0: performance.now(), lastVT: -1, lastUi: 0,
+      shots: [], lastShot: -1e9, cv: null, ai: aiConsent && customCrit.length > 0 }
     runRef.current = run
 
     if (saveVideo && window.MediaRecorder) {
@@ -98,7 +103,7 @@ export default function SessionTracker({ profile, exercise }) {
         run.lastVT = v.currentTime
         const res = landmarkerRef.current.detectForVideo(v, now)
         const lm = res.landmarks && res.landmarks[0]
-        let ok = false, angle = NaN, edge = false, pts = null
+        let ok = false, angle = NaN, edge = false, pts = null, tilt = NaN
         if (lm) {
           pts = idx.map((i) => lm[i])
           edge = pts.some((p) => p.x < EDGE || p.x > 1 - EDGE || p.y < EDGE || p.y > 1 - EDGE)
@@ -110,8 +115,19 @@ export default function SessionTracker({ profile, exercise }) {
             if (angle < 100) run.down = true
             if (run.down && angle > 140) { run.reps += 1; run.down = false }
           }
+          const s1 = lm[11], s2 = lm[12]
+          if (s1 && s2 && (s1.visibility ?? 0) >= MIN_VIS && (s2.visibility ?? 0) >= MIN_VIS) {
+            const dx = Math.abs(s1.x - s2.x) * v.videoWidth
+            const dy = Math.abs(s1.y - s2.y) * v.videoHeight
+            tilt = (Math.atan2(dy, dx) * 180) / Math.PI
+          }
         }
-        run.frames.push({ t: (now - run.t0) / 1000, angle, edge })
+        run.frames.push({ t: (now - run.t0) / 1000, angle, edge, tilt })
+        if (run.ai && now - run.lastShot > 2500 && run.shots.length < 24) {
+          run.lastShot = now
+          const shot = captureFrame(v, run)
+          if (shot) run.shots.push({ t: Math.round((now - run.t0) / 100) / 10, data: shot })
+        }
 
         const c = canvasRef.current
         if (c) {
@@ -158,6 +174,8 @@ export default function SessionTracker({ profile, exercise }) {
     }
     setPhase('saving'); setText('Analysing and saving…')
     const r = analyzeSession(run.frames)
+    const criteria = EXERCISE.criteria || []
+    const criteriaResults = criteria.length ? evaluateCriteria(criteria, r.metrics) : null
 
     let clipPath = null, note = ''
     if (run.chunks.length) {
@@ -170,9 +188,10 @@ export default function SessionTracker({ profile, exercise }) {
       else clipPath = path
     }
 
-    const { error } = await supabase.from('sessions').insert({
+    const { data: row, error } = await supabase.from('sessions').insert({
       patient_id: profile.id,
       exercise: EXERCISE.name,
+      exercise_id: EXERCISE.id || null,
       target_reps: EXERCISE.target,
       repetitions: r.reps,
       range_of_motion_deg: r.rom === null ? null : Math.round(r.rom * 10) / 10,
@@ -181,8 +200,15 @@ export default function SessionTracker({ profile, exercise }) {
       status: r.status,
       source: 'browser camera',
       angle_curve: r.curve,
+      metrics: r.metrics,
+      criteria_results: criteriaResults,
       clip_path: clipPath,
-    })
+    }).select('id').single()
+    if (!error && run.ai && run.shots.length >= 3 && row) {
+      setText('Checking the visual items…')
+      const out = await runVisualCheck(row.id, customCrit, pickFrames(run.shots, 8))
+      note += out.ok ? ' The visual checks were done.' : ' The visual checks could not run: ' + out.error
+    }
     setPhase('idle')
     if (error) { setErr('Could not save the session: ' + error.message); setText('Not saved.'); return }
     setResult(r)
@@ -190,6 +216,7 @@ export default function SessionTracker({ profile, exercise }) {
   }
 
   const running = phase === 'running'
+  const criteria = EXERCISE.criteria || []
   return (
     <div className="card">
       <div className="camwrap" style={{ aspectRatio: ratio, width: `min(100%, ${Math.round(70 * ratio)}vh)` }}>
@@ -199,10 +226,24 @@ export default function SessionTracker({ profile, exercise }) {
       </div>
       <p style={{ fontWeight: 700, fontSize: 17, color: warn ? 'var(--warn)' : 'var(--text)' }}>{text}</p>
       <p className="muted small">{EXERCISE.instruction} Keep your arm flat to the camera and fully inside the picture.</p>
+      {criteria.length > 0 && (
+        <div className="small" style={{ marginBottom: 8 }}>
+          <b>Your physiotherapist will check:</b>
+          <ul style={{ margin: '4px 0 0', paddingLeft: 20 }}>
+            {criteria.map((c) => <li key={c.id}>{describeCriterion(c)}</li>)}
+          </ul>
+        </div>
+      )}
       <label className="consent">
         <input type="checkbox" checked={saveVideo} disabled={phase !== 'idle'} onChange={(e) => setSaveVideo(e.target.checked)} />
         <span>Save a video of this session so my physiotherapist can watch it. Only my physiotherapist and I can see it. If I leave this unticked, no video is recorded.</span>
       </label>
+      {customCrit.length > 0 && (
+        <label className="consent">
+          <input type="checkbox" checked={aiConsent} disabled={phase !== 'idle'} onChange={(e) => setAiConsent(e.target.checked)} />
+          <span>Let an AI model look at about 8 still pictures from this session to check the visual items above. The pictures are not saved by Kinote, but they are sent to an external AI service for this one check. If I leave this unticked, those items stay unchecked.</span>
+        </label>
+      )}
       <div className="row" style={{ marginTop: 10 }}>
         <select style={{ width: 150, margin: 0 }} value={side} disabled={phase !== 'idle'} onChange={(e) => setSide(e.target.value)}>
           <option value="right">Right arm</option>

@@ -57,9 +57,10 @@ function findDips(x, minProm, minDist) {
   return kept.map((k) => k.i).sort((a, b) => a - b)
 }
 
-// frames: [{ t: seconds, angle: degrees or NaN, edge: boolean }]
+// frames: [{ t: seconds, angle: degrees or NaN, edge: boolean, tilt: degrees or NaN }]
 export function analyzeSession(frames) {
   const n = frames.length
+  const r1 = (v) => (Number.isFinite(v) ? Math.round(v * 10) / 10 : null)
   const angles = frames.map((f) => f.angle)
   const good = angles.filter(Number.isFinite)
   const visibility = n ? good.length / n : 0
@@ -78,10 +79,34 @@ export function analyzeSession(frames) {
     reps = repIdx.length
   }
 
-  let status = visibility < MIN_FRAME_VIS ? 'low_tracking_quality' : 'recorded'
+  const status = visibility < MIN_FRAME_VIS ? 'low_tracking_quality' : 'recorded'
   if (status !== 'recorded') { reps = null; rom = null; repIdx = [] }
 
-  const r1 = (v) => (Number.isFinite(v) ? Math.round(v * 10) / 10 : null)
+  // Per-repetition measurements: extension reached before each dip, depth of the dip, time between dips
+  const repMax = [], repMin = [], periods = []
+  repIdx.forEach((idx, k) => {
+    const prev = k ? repIdx[k - 1] : 0
+    let mx = -Infinity
+    for (let i = prev; i <= idx; i++) if (Number.isFinite(smooth[i])) mx = Math.max(mx, smooth[i])
+    repMax.push(Number.isFinite(mx) ? r1(mx) : null)
+    repMin.push(r1(smooth[idx]))
+    if (k) periods.push(r1(frames[idx].t - frames[repIdx[k - 1]].t))
+  })
+
+  const tilts = frames.map((f) => f.tilt).filter(Number.isFinite)
+  const metrics = {
+    status,
+    reps,
+    rom: r1(rom),
+    visibility: Math.round(visibility * 1000) / 1000,
+    duration: r1(n ? frames[n - 1].t : 0),
+    rep_max: repMax,
+    rep_min: repMin,
+    rep_periods: periods,
+    tilt_median: tilts.length >= 5 ? r1(median(tilts)) : null,
+    tilt_p90: tilts.length >= 5 ? r1(percentile(tilts, 90)) : null,
+  }
+
   const curve = { t: frames.map((f) => r1(f.t)), a: smooth.map(r1), reps: repIdx }
-  return { reps, rom, visibility, edgeFraction, status, curve }
+  return { reps, rom, visibility, edgeFraction, status, curve, metrics }
 }

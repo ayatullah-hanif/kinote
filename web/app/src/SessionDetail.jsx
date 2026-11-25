@@ -51,7 +51,7 @@ export default function SessionDetail({ session, onClose }) {
     <div className="card">
       <div className="row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
         <h3 style={{ margin: 0 }}>Session on {new Date(session.created_at).toLocaleString()}</h3>
-        <button className="btn btn-ghost" onClick={onClose}>Close</button>
+        {onClose && <button className="btn btn-ghost" onClick={onClose}>Close</button>}
       </div>
       <p>
         {ok

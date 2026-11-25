@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import { EXERCISE } from './constants'
+import { describeCriterion } from './criteria'
 import Shell from './Shell'
 import SessionsView from './SessionsView'
 import MessagesView from './MessagesView'
@@ -23,8 +24,9 @@ export default function PatientApp({ profile, onSwitch }) {
   }, [profile.id, tab])
 
   const ex = assigned
-    ? { name: assigned.name, target: assigned.target_reps, instruction: assigned.instruction || EXERCISE.instruction }
-    : EXERCISE
+    ? { id: assigned.id, name: assigned.name, target: assigned.target_reps,
+        instruction: assigned.instruction || EXERCISE.instruction, criteria: assigned.criteria || [] }
+    : { ...EXERCISE, criteria: [] }
   const hasVideo = assigned && (assigned.video_url || assigned.video_path)
 
   return (
@@ -39,6 +41,14 @@ export default function PatientApp({ profile, onSwitch }) {
             </span>
             <h3 style={{ marginTop: 10 }}>{ex.name} · {ex.target} repetitions</h3>
             <p>{ex.instruction}</p>
+            {ex.criteria.length > 0 && (
+              <div style={{ marginBottom: 12 }}>
+                <b>Your physiotherapist will check:</b>
+                <ul style={{ margin: '4px 0 0', paddingLeft: 20 }}>
+                  {ex.criteria.map((c) => <li key={c.id}>{describeCriterion(c)}</li>)}
+                </ul>
+              </div>
+            )}
             <ExerciseGuide exercise={assigned} />
             <button className="btn" onClick={() => setTab('Session')}>Start session</button>
           </div>

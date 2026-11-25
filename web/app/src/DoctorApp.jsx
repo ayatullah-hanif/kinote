@@ -3,19 +3,18 @@ import { supabase } from './supabaseClient'
 import { displayName } from './constants'
 import Shell from './Shell'
 import SessionsView from './SessionsView'
-import SessionDetail from './SessionDetail'
+import SessionReview from './SessionReview'
 import MessagesView from './MessagesView'
 import SignalsView from './SignalsView'
-import ExperimentView from './ExperimentView'
-import ExercisesView from './ExercisesView'
 import ResearchView from './ResearchView'
+import ExercisesView from './ExercisesView'
 
 export default function DoctorApp({ profile, onSwitch }) {
-  const [tab, setTab] = useState('Movement')
+  const [tab, setTab] = useState('Sessions')
   const [patients, setPatients] = useState([])
   const [sel, setSel] = useState('')
   const [sessions, setSessions] = useState([])
-  const [open, setOpen] = useState(null)
+  const [selSession, setSelSession] = useState('')
   const [perr, setPerr] = useState('')
 
   function loadPatients() {
@@ -29,7 +28,7 @@ export default function DoctorApp({ profile, onSwitch }) {
   }
 
   useEffect(() => { loadPatients() }, [tab])
-  useEffect(() => { setOpen(null) }, [sel])
+  useEffect(() => { setSelSession('') }, [sel])
 
   useEffect(() => {
     if (!sel) { setSessions([]); return }
@@ -41,7 +40,7 @@ export default function DoctorApp({ profile, onSwitch }) {
 
   return (
     <Shell profile={profile} roleLabel="Physiotherapist"
-      tabs={['Movement', 'Exercises', 'Muscle and brain signals', 'Research', 'Messages']} active={tab} onTab={setTab}
+      tabs={['Sessions', 'Exercises', 'Muscle and brain signals', 'Research', 'Messages']} active={tab} onTab={setTab}
       onSwitch={onSwitch} switchLabel="Switch to patient view">
       <h2>Physiotherapist dashboard</h2>
       {tab === 'Research' ? (
@@ -66,11 +65,13 @@ export default function DoctorApp({ profile, onSwitch }) {
             </div>
             <p className="msg-err">{perr}</p>
           </div>
-          {tab === 'Movement' && (
+          {tab === 'Sessions' && (
             <>
-              <p className="muted">[Measured] Camera movement analysis of this patient's sessions</p>
-              {open && <SessionDetail session={open} onClose={() => setOpen(null)} />}
-              <SessionsView sessions={sessions} onOpen={setOpen} openId={open?.id} />
+              <SessionReview sessions={sessions} sessionId={selSession} onSelect={setSelSession} datasetPatient={current?.dataset_patient} />
+              <h3 style={{ margin: '22px 0 10px' }}>All sessions</h3>
+              <SessionsView sessions={sessions}
+                onOpen={(x) => { setSelSession(x.id); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                openId={selSession} />
             </>
           )}
           {tab === 'Exercises' && (
